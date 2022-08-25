@@ -1,10 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using FluentValidation;
 
 namespace CustomerLibrary
 {
-    public class CustomerValidator
+    public class CustomerValidator : AbstractValidator<Customer>
     {
+        const string FirstNameTooLong = "First name is too long";
+        const string LastNameTooLong = "Last name is too long";
+        const string LastNameEmpty = "Last name can't be empty";
+        const string AddressEmpty = "Addresses can't be empty";
+        const string PhoneFormatInvalid = "Phone number has wrong format";
+        const string EmailFormatInvalid = "Email has wrong format";
+        const string NotesEmpty = "Notes can't be empty";
+
         const int FirstNameMaxLength = 50;
         const int LastNameMaxLength = 50;
         const int AddressMinLength = 1;
@@ -12,46 +21,26 @@ namespace CustomerLibrary
         const string PhoneFormat = @"^\+[1-9]\d{1,14}$";
         const string EmailFormat = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
 
-        public static List<string> Validate(Customer customer)
+        public CustomerValidator()
         {
-            var errors = new List<string>();
+            RuleFor(customer => customer.FirstName)
+                .MaximumLength(FirstNameMaxLength).WithMessage(FirstNameTooLong);
 
-            if (customer.FirstName.Length > FirstNameMaxLength)
-            {
-                errors.Add("First name is too long");
-            }
+            RuleFor(customer => customer.LastName)
+                .NotEmpty().WithMessage(LastNameEmpty)
+                .MaximumLength(LastNameMaxLength).WithMessage(LastNameTooLong);
 
-            if (string.IsNullOrWhiteSpace(customer.LastName))
-            {
-                errors.Add("Last name can't be empty");
-            }
+            RuleFor(customer => customer.Addresses)
+                .NotEmpty().WithMessage(AddressEmpty);
 
-            if (customer.LastName.Length > LastNameMaxLength)
-            {
-                errors.Add("Last name is too long");
-            }
+            RuleFor(customer => customer.Phone)
+                .Matches(PhoneFormat).WithMessage(PhoneFormatInvalid);
 
-            if (customer.Addresses.Count < AddressMinLength)
-            {
-                errors.Add("Addresses can't be empty");
-            }
+            RuleFor(customer => customer.Email)
+                .Matches(EmailFormat).WithMessage(EmailFormatInvalid);
 
-            if (!Regex.IsMatch(customer.Phone, PhoneFormat))
-            {
-                errors.Add("Phone number has wrong format");
-            }
-
-            if (!Regex.IsMatch(customer.Email, EmailFormat))
-            {
-                errors.Add("Email has wrong format");
-            }
-
-            if (customer.Notes.Count < NotesMinLength)
-            {
-                errors.Add("Notes can't be empty");
-            }
-
-            return errors;
+            RuleFor(customer => customer.Notes)
+                .NotEmpty().WithMessage(NotesEmpty);
         }
     }
 }

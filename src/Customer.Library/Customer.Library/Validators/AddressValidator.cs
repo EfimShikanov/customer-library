@@ -1,12 +1,24 @@
-﻿using System;
+﻿using FluentValidation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace CustomerLibrary
 {
-    public class AddressValidator
+    public class AddressValidator : AbstractValidator<Address>
     {
+        const string AddressEmpty = "Address Line can't be empty";
+        const string AddressTooLong = "Address Line is too long";
+        const string Address2TooLong = "Address Line 2 is too long";
+        const string CityEmpty = "City can't be empty";
+        const string CityTooLong = "City is too long";
+        const string PostalCodeEmpty = "Postal Code can't be empty";
+        const string PostalCodeTooLong = "Postal Code is too long";
+        const string StateEmpty = "State can't be empty";
+        const string StateTooLong = "State is too long";
+        const string CountryInvalid = "Country accepts only United States or Canada";
+
         const int AddressLineMaxLength = 100;
         const int AddressLine2MaxLength = 100;
         const int CityMaxLength = 50;
@@ -18,57 +30,29 @@ namespace CustomerLibrary
             "Canada"
         };
 
-        public static List<string> Validate(Address address)
+        public AddressValidator()
         {
-            var errorList = new List<string>();
+            RuleFor(address => address.AddressLine)
+                .NotEmpty().WithMessage(AddressEmpty)
+                .MaximumLength(AddressLineMaxLength).WithMessage(AddressTooLong);
 
-            if (string.IsNullOrWhiteSpace(address.AddressLine))
-            {
-                errorList.Add("Address Line can't be empty");
-            }
-            else if (address.AddressLine.Length > AddressLineMaxLength)
-            {
-                errorList.Add("Address Line is too long");
-            }
+            RuleFor(address => address.AddressLine2)
+                .MaximumLength(AddressLine2MaxLength).WithMessage(Address2TooLong);
 
-            if (!string.IsNullOrEmpty(address.AddressLine2) && address.AddressLine2.Length > AddressLine2MaxLength)
-            {
-                errorList.Add("Address Line 2 is too long");
-            }
+            RuleFor(address => address.City)
+                .NotEmpty().WithMessage(CityEmpty)
+                .MaximumLength(CityMaxLength).WithMessage(CityTooLong);
 
-            if (string.IsNullOrWhiteSpace(address.City))
-            {
-                errorList.Add("City can't be empty");
-            }
-            else if (address.City.Length > CityMaxLength)
-            {
-                errorList.Add("City is too long");
-            }
+            RuleFor(address => address.PostalCode)
+                .NotEmpty().WithMessage(PostalCodeEmpty)
+                .MaximumLength(PostalCodeMaxLength).WithMessage(PostalCodeTooLong);
 
-            if (string.IsNullOrWhiteSpace(address.PostalCode))
-            {
-                errorList.Add("Postal Code can't be empty");
-            }
-            else if (address.PostalCode.Length > PostalCodeMaxLength)
-            {
-                errorList.Add("Postal Code is too long");
-            }
+            RuleFor(address => address.State)
+                .NotEmpty().WithMessage(StateEmpty)
+                .MaximumLength(StateMaxLength).WithMessage(StateTooLong);
 
-            if (string.IsNullOrWhiteSpace(address.State))
-            {
-                errorList.Add("State can't be empty");
-            }
-            else if (address.State.Length > StateMaxLength)
-            {
-                errorList.Add("State is too long");
-            }
-
-            if (!AvailableCountries.Contains(address.Country, StringComparer.OrdinalIgnoreCase))
-            {
-                errorList.Add("City accepts only United States or Canada");
-            }
-
-            return errorList;
+            RuleFor(address => address.Country)
+                .Must(country => AvailableCountries.Contains(country, StringComparer.OrdinalIgnoreCase)).WithMessage(CountryInvalid);
         }
     }
 }

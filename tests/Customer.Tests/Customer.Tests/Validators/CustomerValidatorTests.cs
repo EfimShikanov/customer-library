@@ -1,18 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using FluentValidation.TestHelper;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Xunit;
 
 namespace CustomerLibrary.Tests
 {
     public class CustomerValidatorTests
     {
+        public CustomerValidator validator = new CustomerValidator();
+
         [Fact]
         public void ShouldReturnFirstNameIsTooLong()
         {
             Customer customer = new Customer { FirstName = new string('f', 51) };
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("First name is too long", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.FirstName).WithErrorMessage("First name is too long");
         }
 
         [Fact]
@@ -20,9 +24,9 @@ namespace CustomerLibrary.Tests
         {
             Customer customer = new Customer("Firstname", "", new List<Address>(), "phone", "email", new List<string>(), 0);
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Last name can't be empty", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.LastName).WithErrorMessage("Last name can't be empty");
         }
 
         [Fact]
@@ -30,9 +34,9 @@ namespace CustomerLibrary.Tests
         {
             Customer customer = new Customer("Firstname", new string('f', 51), new List<Address>(), "phone", "email", new List<string>(), 0);
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Last name is too long", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.LastName).WithErrorMessage("Last name is too long");
         }
 
         [Fact]
@@ -40,9 +44,9 @@ namespace CustomerLibrary.Tests
         {
             Customer customer = new Customer("Firstname", "Lastname", new List<Address>(), "phone", "email", new List<string>(), 0);
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Addresses can't be empty", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.Addresses).WithErrorMessage("Addresses can't be empty");
         }
 
         [Fact]
@@ -50,9 +54,9 @@ namespace CustomerLibrary.Tests
         {
             Customer customer = new Customer("Firstname", "Lastname", new List<Address>(), "phone", "email", new List<string>(), 0);
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Phone number has wrong format", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.Phone).WithErrorMessage("Phone number has wrong format");
         }
 
         [Fact]
@@ -60,9 +64,9 @@ namespace CustomerLibrary.Tests
         {
             Customer customer = new Customer("Firstname", "Lastname", new List<Address>(), "phone", "email", new List<string>(), 0);
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Email has wrong format", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.Email).WithErrorMessage("Email has wrong format");
         }
 
         [Fact]
@@ -70,9 +74,9 @@ namespace CustomerLibrary.Tests
         {
             Customer customer = new Customer("Firstname", "Lastname", new List<Address>(), "phone", "email", new List<string>(), 0);
 
-            List<string> result = CustomerValidator.Validate(customer);
+            var result = validator.TestValidate(customer);
 
-            Assert.Contains("Notes can't be empty", result);
+            result.ShouldHaveValidationErrorFor(customer => customer.Notes).WithErrorMessage("Notes can't be empty");
         }
     }
 }
